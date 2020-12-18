@@ -1,6 +1,6 @@
 # video-cutter
 
-Python lambda for cutting and formatting videos. Built with moviepy which uses ffmpeg.
+Python lambda for cutting and formatting videos. Built with moviepy which uses ffmpeg. The video-cutter is designed to listen to new file events in an S3 then cut and format those videos to be processed by the tennis-swing-cutter lambda. 
 
 ## Lambda Architecture
 
