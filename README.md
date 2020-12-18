@@ -40,7 +40,7 @@ $ mkdir /tmp/moviepy-layer && cp requirements.txt /tmp/moviepy-layer/requirement
 
 terminal2
 $ docker run -it -v /tmp/moviepy-layer:/moviepy-layer lambci/lambda:build-python3.8 bash  
-$ cd moviepy-layer  
+$ cd /moviepy-layer  
 $ pip install -t python/lib/python3.8/site-packages/ -r requirements.txt
 
 terminal1
