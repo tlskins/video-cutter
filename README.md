@@ -42,4 +42,7 @@ terminal2
 $ docker run -it -v /tmp/moviepy-layer:/moviepy-layer lambci/lambda:build-python3.8 bash  
 $ cd moviepy-layer  
 $ pip install -t python/lib/python3.8/site-packages/ -r requirements.txt
+
+terminal1
+zip -r -9 opencv-numpy-py3-8-layer.zip python
 ```
