@@ -34,6 +34,7 @@ custom-moviepy-layer
 Build custom moviepy layer using the below commands. Will use requirements.txt in the repo to build these dependencies on the aws python3.8 env.
 reference: (https://stackoverflow.com/questions/64016819/cant-use-opencv-python-in-aws-lambda)
 
+```
 terminal1
 $ mkdir /tmp/moviepy-layer && cp requirements.txt /tmp/moviepy-layer/requirements.txt && cd /tmp/moviepy-layer
 
@@ -41,3 +42,4 @@ terminal2
 $ docker run -it -v /tmp/moviepy-layer:/moviepy-layer lambci/lambda:build-python3.8 bash  
 $ cd moviepy-layer  
 $ pip install -t python/lib/python3.8/site-packages/ -r requirements.txt
+```
