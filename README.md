@@ -1,16 +1,16 @@
-### video-cutter
+# video-cutter
 
 Python lambda for cutting and formatting videos. Built with moviepy which uses ffmpeg.
 
 ## Lambda Architecture
 
-# Basic Settings:
+### Basic Settings:
 
 Runtime: Python 3.8  
 Memory: 2048 MB  
 Timeout: 15min
 
-# Environment vars:
+### Environment vars:
 
 ACCESS_KEY_ID: "XXX"  
 CLIP_LENGTH_SECS: 45  
@@ -19,14 +19,14 @@ SECRET_ACCESS_KEY: "XXX"
 TARGET_BUCKET: "bucket-name"  
 TARGET_ROOT_FOLDER: "clips"
 
-# Trigger:
+### Trigger:
 
 S3 ObjectCreated  
 Prefix: originals/
 
 ## Dependencies
 
-# Layers:
+### Layers:
 
 AWSLambda-Python38-SciPy1x (v29)  
 custom-moviepy-layer
