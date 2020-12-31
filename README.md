@@ -1,6 +1,6 @@
 # video-cutter
 
-Python lambda for cutting and formatting videos. Built with moviepy which uses ffmpeg.
+Python lambda for cutting and formatting videos. Built with moviepy which uses ffmpeg. The video-cutter is designed to listen to new file events in an S3 then cut and format those videos to be processed by the tennis-swing-cutter lambda. 
 
 ## Lambda Architecture
 
@@ -34,10 +34,15 @@ custom-moviepy-layer
 Build custom moviepy layer using the below commands. Will use requirements.txt in the repo to build these dependencies on the aws python3.8 env.
 reference: (https://stackoverflow.com/questions/64016819/cant-use-opencv-python-in-aws-lambda)
 
+```
 terminal1
 $ mkdir /tmp/moviepy-layer && cp requirements.txt /tmp/moviepy-layer/requirements.txt && cd /tmp/moviepy-layer
 
 terminal2
 $ docker run -it -v /tmp/moviepy-layer:/moviepy-layer lambci/lambda:build-python3.8 bash  
-$ cd moviepy-layer  
+$ cd /moviepy-layer  
 $ pip install -t python/lib/python3.8/site-packages/ -r requirements.txt
+
+terminal1
+zip -r -9 opencv-numpy-py3-8-layer.zip python
+```
