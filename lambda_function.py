@@ -77,6 +77,7 @@ def lambda_handler(event, context):
         aws_secret_access_key=SECRET_ACCESS_KEY
     ).resource('s3')
 
+    outputs = []
     for i in range(0, clips):
         print('processing clip {}'.format(i))
         suffix = str(i+1)
@@ -89,9 +90,13 @@ def lambda_handler(event, context):
         print(target_key)
         s3_session.meta.client.upload_file(
             clip_path, TARGET_BUCKET, target_key)
+        outputs.append(target_key)
 
     return {
         "statusCode": 200,
         "headers": {"content-type": "application/json"},
-        "body":  None,
+        "body":  {
+            "bucket": TARGET_BUCKET,
+            "outputs": outputs,
+        },
     }
