@@ -65,7 +65,7 @@ def lambda_handler(event, context):
     )
 
     source_vid = VideoFileClip(file_dl_path)
-    print(source_vid.duration)
+    print('duration {}'.format(source_vid.duration))
 
     clips = math.ceil(source_vid.duration / CLIP_LENGTH_SECS)
     if clips > MAX_CLIPS:
@@ -85,8 +85,8 @@ def lambda_handler(event, context):
         clip = source_vid.subclip(CLIP_LENGTH_SECS*i, CLIP_LENGTH_SECS*(i+1))
         clip_path = '{}/{}_clip_{}.mp4'.format(write_path, file_name, suffix)
         clip.write_videofile(clip_path, audio=False)
-        target_key = '{}/{}/{}/{}_clip_{}.mp4'.format(
-            TARGET_ROOT_FOLDER, user_id, album_id, file_name, suffix)
+        target_key = '{}/{}/{}/{}/{}_clip_{}.mp4'.format(
+            TARGET_ROOT_FOLDER, user_id, album_id, CLIP_LENGTH_SECS, file_name, suffix)
         print(target_key)
         s3_session.meta.client.upload_file(
             clip_path, TARGET_BUCKET, target_key)
