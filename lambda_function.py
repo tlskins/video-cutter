@@ -5,24 +5,24 @@ import json
 from os import environ
 from os import listdir
 
-dl_path = '/tmp'
-write_path = '/tmp'
+downloadPath = '/tmp'
+writePath = '/tmp'
 
 
 def lambda_handler(event, context):
-    data_retrieved = event['Records'][0]['s3']
-    bucket_name = data_retrieved['bucket']['name']
-    file_key = data_retrieved['object']['key']
-    print(file_key)
-    file_paths = file_key.split('/')
-    print(file_paths)
+    dataRetrieved = event['Records'][0]['s3']
+    bucketName = dataRetrieved['bucket']['name']
+    fileKey = dataRetrieved['object']['key']
+    print(fileKey)
+    filePaths = fileKey.split('/')
+    print(filePaths)
 
-    root_folder = file_paths[0]
-    user_id = file_paths[1]
-    album_id = file_paths[2]
-    full_file_name = file_paths[3]
+    rootFolder = filePaths[0]
+    userId = filePaths[1]
+    uploadId = filePaths[2]
+    fullFileName = filePaths[3]
 
-    if not root_folder or not user_id or not album_id or not full_file_name:
+    if not rootFolder or not userId or not uploadId or not fullFileName:
         return {
             "statusCode": 422,
             "headers": {"content-type": "application/json"},
@@ -47,71 +47,71 @@ def lambda_handler(event, context):
         CLIP_LENGTH_SECS = int(settings.CLIP_LENGTH_SECS)
         MAX_CLIPS = int(settings.MAX_CLIPS)
 
-    if TARGET_ROOT_FOLDER == root_folder:
+    if TARGET_ROOT_FOLDER == rootFolder:
         return {
             "statusCode": 422,
             "headers": {"content-type": "application/json"},
             "body":  "Source and target folders cannot be the same",
         }
 
-    ext_idx = full_file_name.rfind('.')
-    file_name = full_file_name[0:ext_idx]
-    file_ext = full_file_name[ext_idx+1:]
-    file_dl_path = '{}/{}.{}'.format(dl_path, file_name, file_ext)
-    print(file_dl_path)
+    extIdx = fullFileName.rfind('.')
+    fileName = fullFileName[0:extIdx]
+    fileExt = fullFileName[extIdx+1:]
+    fileDownloadPath = '{}/{}.{}'.format(downloadPath, fileName, fileExt)
+    print(fileDownloadPath)
 
     s3 = boto3.client('s3')
     s3.download_file(
-        bucket_name,
-        file_key,
-        file_dl_path,
+        bucketName,
+        fileKey,
+        fileDownloadPath,
     )
 
-    source_vid = VideoFileClip(file_dl_path)
-    print('duration {}'.format(source_vid.duration))
+    srcVideo = VideoFileClip(fileDownloadPath)
+    print('duration {}'.format(srcVideo.duration))
 
-    clips = math.ceil(source_vid.duration / CLIP_LENGTH_SECS)
+    clips = math.ceil(srcVideo.duration / CLIP_LENGTH_SECS)
     if clips > MAX_CLIPS:
         clips = MAX_CLIPS
     print('clips {}'.format(clips))
 
-    s3_session = boto3.session.Session(
+    s3Session = boto3.session.Session(
         aws_access_key_id=ACCESS_KEY_ID,
         aws_secret_access_key=SECRET_ACCESS_KEY
     ).resource('s3')
 
     outputs = []
-    for clip_num in range(0, clips):
-        print('processing clip {}'.format(clip_num))
+    for clipNum in range(0, clips):
+        print('processing clip {}'.format(clipNum))
         # clip video
-        startClip = CLIP_LENGTH_SECS*clip_num
-        endClip = CLIP_LENGTH_SECS*(clip_num+1)
-        clip = source_vid.subclip(startClip, endClip)
-        clip_path = '{}/{}_clip_{}.mp4'.format(write_path, file_name, clip_num)
-        clip.write_videofile(clip_path, audio=False)
-        target_key = '{}/{}/{}/{}_clip_{}.mp4'.format(
-            TARGET_ROOT_FOLDER, user_id, album_id, file_name, clip_num)
-        print(target_key)
-        s3_session.meta.client.upload_file(
-            clip_path, TARGET_BUCKET, target_key)
+        startClip = CLIP_LENGTH_SECS*clipNum
+        endClip = CLIP_LENGTH_SECS*(clipNum+1)
+        clip = srcVideo.subclip(startClip, endClip)
+        clipPath = '{}/{}_clip_{}.mp4'.format(writePath, fileName, clipNum)
+        clip.write_videofile(clipPath, audio=False)
+        targetKey = '{}/{}/{}/{}_clip_{}.mp4'.format(
+            TARGET_ROOT_FOLDER, userId, uploadId, fileName, clipNum)
+        print(targetKey)
+        s3Session.meta.client.upload_file(
+            clipPath, TARGET_BUCKET, targetKey)
 
         # save meta to json file
-        metaPath = '{}/{}_clip_{}.txt'.format(write_path, file_name, clip_num)
+        metaPath = '{}/{}_clip_{}.txt'.format(writePath, fileName, clipNum)
         metaTargetKey = '{}/{}/{}/{}_clip_{}.txt'.format(
-            TARGET_META_FOLDER, user_id, album_id, file_name, clip_num)
+            TARGET_META_FOLDER, userId, uploadId, fileName, clipNum)
         clipMeta = {
-            "path": target_key,
+            "path": targetKey,
             "metaPath": metaTargetKey,
-            "fileName": file_name,
-            "number": clip_num,
+            "fileName": fileName,
+            "number": clipNum,
             "startSec": startClip,
             "endSec": endClip,
-            "userId": user_id,
-            "uploadId": album_id,
+            "userId": userId,
+            "uploadId": uploadId,
         }
         with open(metaPath, 'w') as outfile:
             json.dump(clipMeta, outfile)
-        s3_session.meta.client.upload_file(
+        s3Session.meta.client.upload_file(
             metaPath, TARGET_BUCKET, metaTargetKey)
         outputs.append(clipMeta)
 
@@ -119,8 +119,8 @@ def lambda_handler(event, context):
         "statusCode": 200,
         "headers": {"content-type": "application/json"},
         "body":  {
-            "userId": user_id,
-            "uploadId": album_id,
+            "userId": userId,
+            "uploadId": uploadId,
             "bucket": TARGET_BUCKET,
             "outputs": outputs,
         },
