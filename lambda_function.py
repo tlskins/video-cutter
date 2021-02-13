@@ -4,6 +4,7 @@ import math
 import json
 from os import environ
 from os import listdir
+from os import path
 
 downloadPath = '/tmp'
 writePath = '/tmp'
@@ -67,8 +68,10 @@ def lambda_handler(event, context):
         fileDownloadPath,
     )
 
+    srcSize = os.path.getsize(fileDownloadPath)
     srcVideo = VideoFileClip(fileDownloadPath)
-    print('duration {}'.format(srcVideo.duration))
+    srcDuration = srcVideo.duration
+    print('duration {}'.format(srcDuration))
 
     clips = math.ceil(srcVideo.duration / CLIP_LENGTH_SECS)
     if clips > MAX_CLIPS:
@@ -121,6 +124,8 @@ def lambda_handler(event, context):
         "body":  {
             "userId": userId,
             "uploadId": uploadId,
+            "sourceLength": srcDuration,
+            "sourceSize": srcSize,
             "bucket": TARGET_BUCKET,
             "outputs": outputs,
         },
